@@ -55,9 +55,18 @@ def games(request):
     if request.method == 'GET':
         if request.query_params:
             id = request.GET.get('id', None)
-            objects = Game.objects.filter(booth_id = id)
-            serializer = GamesSerializer(objects, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            title = request.GET.get('title', None)
+
+            if id is not None:
+                objects = Game.objects.filter(booth_id = id)
+                serializer = GamesSerializer(objects, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            
+            if title is not None:
+                object = Game.objects.get(title=title)
+                serializer = GamesSerializer(object)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+
         else:
             objects = Game.objects.all()
             serializer = GamesSerializer(objects, many=True)
