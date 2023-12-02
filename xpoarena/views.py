@@ -2,8 +2,8 @@ from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from rest_framework.response import Response
-from xpoarena.serializers import BoothSerializer
-from .models import Booth
+from xpoarena.serializers import BoothSerializer, GamesSerializer
+from .models import Booth, Game
 
 @api_view(['GET', 'POST', 'PATCH'])
 @parser_classes([MultiPartParser, FormParser])  
@@ -11,8 +11,8 @@ from .models import Booth
 def booth(request):
     if request.method == 'GET':
         if request.query_params:
-            name = request.GET.get('name')
-            object = Booth.objects.get(name=name)
+            id = request.GET.get('id')
+            object = Booth.objects.get(id=id)
             serializer = BoothSerializer(object)
             return Response(serializer.data)
         else:
@@ -50,4 +50,15 @@ def update_booth(request, booth_id):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         
-        
+@api_view(['GET'])
+def games(request):
+    if request.method == 'GET':
+        if request.query_params:
+            id = request.GET.get('id', None)
+            objects = Game.objects.filter(booth_id = id)
+            serializer = GamesSerializer(objects, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            objects = Game.objects.all()
+            serializer = GamesSerializer(objects, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
