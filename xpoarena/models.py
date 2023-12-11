@@ -73,3 +73,12 @@ class GameScreenshot(models.Model):
 
     def __str__(self):
         return f"{self.game.title} - Screenshot"
+    
+class Theme(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    theme_video = models.FileField(upload_to=upload_to, null=True, blank=True)
+    font_name = models.CharField(max_length=255)
+    font_color = models.CharField(max_length=10) 
+
+    def __str__(self):
+        return self.name
