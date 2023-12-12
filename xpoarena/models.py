@@ -76,9 +76,18 @@ class GameScreenshot(models.Model):
     
 class Theme(models.Model):
     name = models.CharField(max_length=255, unique=True)
-    theme_video = models.FileField(upload_to=upload_to, null=True, blank=True)
+    theme_video = models.FileField(upload_to=upload_to)
     font_name = models.CharField(max_length=255)
     font_color = models.CharField(max_length=10) 
 
     def __str__(self):
         return self.name
+
+class BoothCustomization(models.Model):
+    booth = models.OneToOneField(Booth, on_delete=models.CASCADE, related_name='customization')
+    theme = models.ForeignKey(Theme, on_delete=models.SET_NULL, null=True, blank=True, related_name='booths')
+    background_color = models.CharField(max_length=7) 
+    font_color = models.CharField(max_length=7)  
+
+    def __str__(self):
+        return f"Customizations for {self.booth.name}"

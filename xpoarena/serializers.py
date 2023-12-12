@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Booth, Game, Theme
+from .models import Booth, Game, Theme, BoothCustomization
 
 class BoothSerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,4 +15,9 @@ class GamesSerializer(serializers.ModelSerializer):
 class ThemeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Theme
+        fields = "__all__"
+
+class BoothCustomizationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BoothCustomization
         fields = "__all__"

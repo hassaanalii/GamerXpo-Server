@@ -2,8 +2,8 @@ from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from rest_framework.response import Response
-from xpoarena.serializers import BoothSerializer, GamesSerializer
-from .models import Booth, Game
+from xpoarena.serializers import BoothSerializer, GamesSerializer, ThemeSerializer, BoothCustomizationSerializer
+from .models import Booth, Game, Theme, BoothCustomization
 
 @api_view(['GET', 'POST', 'PATCH'])
 @parser_classes([MultiPartParser, FormParser])  
@@ -80,3 +80,35 @@ def games(request):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['POST', 'GET'])
+def theme(request):
+    if request.method == 'POST':
+        serializer = ThemeSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    elif request.method == 'GET':
+        if request.query_params:
+            name = request.GET.get('name')
+            object = Theme.objects.get(name=name)
+            serializer = ThemeSerializer(object)
+            return Response(serializer.data)
+
+@api_view(['POST', 'GET'])
+def customizedBooth(request):
+    if request.method == 'POST':
+        data = request.data
+        serializer = BoothCustomizationSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    elif request.method == 'GET':
+        if request.query_params:
+            id = request.GET.get('id')
+            object = BoothCustomization.objects.get(booth_id=id)
+            serializer = BoothCustomizationSerializer(object)
+            return Response(serializer.data, status=status.HTTP_200_OK)
