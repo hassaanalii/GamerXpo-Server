@@ -76,7 +76,7 @@ class GameScreenshot(models.Model):
     
 class Theme(models.Model):
     name = models.CharField(max_length=255, unique=True)
-    theme_video = models.FileField(upload_to=upload_to)
+    theme_video = models.FileField(upload_to=upload_to, null=True, blank=True)
     font_name = models.CharField(max_length=255)
     font_color = models.CharField(max_length=10) 
 

@@ -90,9 +90,14 @@ def theme(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     elif request.method == 'GET':
-        if request.query_params:
+        if 'name' in request.query_params:
             name = request.GET.get('name')
             object = Theme.objects.get(name=name)
+            serializer = ThemeSerializer(object)
+            return Response(serializer.data)
+        elif 'id' in request.query_params:
+            id = request.GET.get('id')
+            object = Theme.objects.get(id=id)
             serializer = ThemeSerializer(object)
             return Response(serializer.data)
 
@@ -112,3 +117,19 @@ def customizedBooth(request):
             object = BoothCustomization.objects.get(booth_id=id)
             serializer = BoothCustomizationSerializer(object)
             return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        
+
+@api_view(['PUT'])
+def update_booth_customization(request, pk):
+    try:
+        booth_customization = BoothCustomization.objects.get(pk=pk)
+    except BoothCustomization.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'PUT':
+        serializer = BoothCustomizationSerializer(booth_customization, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
