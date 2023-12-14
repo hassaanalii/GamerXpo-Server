@@ -48,6 +48,35 @@ def update_booth(request, booth_id):
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        
+@api_view(['GET', 'POST', 'PATCH', 'DELETE'])
+@parser_classes([MultiPartParser, FormParser])  
+def update_game(request, title):
+    if request.method == 'PATCH':
+        data = request.data
+        if not title:
+            return Response({"error": "No game title provided"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            game_object = Game.objects.get(title=title)
+        except Booth.DoesNotExist:
+            return Response({"error": "Game not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = GamesSerializer(game_object, data=data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+    elif request.method == 'DELETE':
+        try:
+            game_object = Game.objects.get(title=title)
+        except Game.DoesNotExist:
+            return Response({"error": "Game not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        game_object.delete()
+        return Response({"success": f"Booth {title} deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
         
 @api_view(['GET', 'POST'])

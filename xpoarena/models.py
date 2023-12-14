@@ -29,6 +29,7 @@ class Game(models.Model):
     CASUAL = 'Casual'
     SHOOTING = 'Shooting'
     DRIVING = 'Driving'
+    HORROR = 'Horror'
 
     GENRE_CHOICES = [
         (ACTION, 'Action'),
@@ -38,6 +39,7 @@ class Game(models.Model):
         (CASUAL, 'Causal'),
         (SHOOTING, 'Shooting'),
         (DRIVING, 'Driving'),
+        (HORROR, 'Horror'),
     ]
 
     TECHNOLOGY_CHOICES = [
@@ -53,7 +55,7 @@ class Game(models.Model):
     title = models.CharField(max_length=255, unique=True)
     release_date = models.DateField()
     game_iframe_src = models.URLField(max_length=1000)
-    genre = models.CharField(max_length=255, choices=GENRE_CHOICES, default='RPG')
+    genre = models.CharField(max_length=255, choices=GENRE_CHOICES, default='Adventure')
     game_description = models.TextField()
     image_url = models.URLField(max_length=1000)
     last_updated = models.DateField(auto_now=True)
