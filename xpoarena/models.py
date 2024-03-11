@@ -64,6 +64,10 @@ class Game(models.Model):
     game_trailer = models.FileField(upload_to=upload_to, null=True, blank=True)
     price = models.DecimalField(max_digits=6, decimal_places=2)
     game_download_link = models.URLField(max_length=1000)
+    image = models.ImageField(_("Image"), upload_to=upload_to, null=True, blank=True)
+
+
+
 
     def __str__(self):
         return self.title
