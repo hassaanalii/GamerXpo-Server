@@ -4,6 +4,16 @@ from rest_framework import status
 from rest_framework.response import Response
 from xpoarena.serializers import BoothSerializer, GamesSerializer, ThemeSerializer, BoothCustomizationSerializer
 from .models import Booth, Game, Theme, BoothCustomization
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.password_validation import validate_password
+from rest_framework.exceptions import ValidationError
+from django.contrib.auth.models import User
+
+import logging
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
+
 
 @api_view(['GET', 'POST', 'PATCH'])
 @parser_classes([MultiPartParser, FormParser])  
@@ -162,3 +172,40 @@ def update_booth_customization(request, pk):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['POST'])
+def login_view(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+    user = authenticate(request, username=username, password=password)
+    if user is not None:
+        login(request, user)
+        return Response({"detail": "Login successful"}, status=status.HTTP_200_OK)
+    else:
+        return Response({"detail": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['POST'])
+def signup(request):
+    username = request.data.get('username')
+    email = request.data.get('email')
+    password1 = request.data.get('password1')
+    password2 = request.data.get('password2')
+
+    if password1 != password2:
+        return Response({"error": "Passwords do not match"}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        # Validate the password against Django's password validation settings
+        validate_password(password1)
+
+        # Create a new user. Note: You should handle more cases here, such as existing users.
+        user = User.objects.create_user(username=username, email=email, password=password1)
+        user.save()
+        return Response({"detail": "Signup successful"}, status=status.HTTP_201_CREATED)
+    except ValidationError as e:
+        logger.error(f"Validation error during signup: {e.messages}")
+        return Response({"error": e.messages}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        logger.error(f"Unexpected error during signup: {str(e)}")
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
