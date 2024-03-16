@@ -8,6 +8,10 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.password_validation import validate_password
 from rest_framework.exceptions import ValidationError
 from django.contrib.auth.models import User
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from django.shortcuts import redirect
+
 
 import logging
 
@@ -209,3 +213,8 @@ def signup(request):
     except Exception as e:
         logger.error(f"Unexpected error during signup: {str(e)}")
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+def google_login(request):
+    adapter = GoogleOAuth2Adapter(request)
+    client = OAuth2Client(adapter, callback_url=request.build_absolute_uri('/accounts/google/login/callback/'))
+    return redirect(client.get_redirect_url())
