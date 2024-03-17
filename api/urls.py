@@ -1,4 +1,4 @@
-from xpoarena.views import booth, update_booth, games, theme, customizedBooth, update_booth_customization, update_game, login_view, signup, google_login
+from xpoarena.views import booth, update_booth, games, theme, customizedBooth, update_booth_customization, update_game, login_view, signup, google_login, some_view
 from django.urls import path
 
 urlpatterns = [
@@ -12,4 +12,5 @@ urlpatterns = [
     path('login/', login_view, name='custom_login'),
     path('signup/', signup, name='custom_signup'),
     path('google_login/', google_login, name='google_login'),
+    path('some/', some_view)
 ]

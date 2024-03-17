@@ -71,7 +71,9 @@ ROOT_URLCONF = 'gamerxpo.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -84,6 +86,10 @@ TEMPLATES = [
         },
     },
 ]
+
+SOCIALACCOUNT_LOGIN_ON_GET=True
+SOCIALACCOUNT_AUTO_SIGNUP = True
+ACCOUNT_EMAIL_VERIFICATION = 'none'
 
 WSGI_APPLICATION = 'gamerxpo.wsgi.application'
 

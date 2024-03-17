@@ -11,12 +11,35 @@ from django.contrib.auth.models import User
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from django.shortcuts import redirect
-
-
+from django.shortcuts import HttpResponseRedirect
+from allauth.socialaccount.models import SocialAccount
 import logging
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
+
+
+@api_view(['GET'])
+def some_view(request):
+    user = request.user
+    user_data = {
+        'username': user.username,
+        'email': user.email,
+        'first_name': user.first_name,
+        'last_name': user.last_name
+    }
+    
+    try:
+        social_account = SocialAccount.objects.get(user=user, provider='google')
+        user_data['social_name'] = social_account.extra_data.get('name', '')
+        user_data['social_email'] = social_account.extra_data.get('email', '')
+        user_data['social_picture'] = social_account.extra_data.get('picture', '')
+    except SocialAccount.DoesNotExist:
+        # The user does not have a social account, no action needed
+        # as the user_data dict already contains the username and email
+        pass
+    
+    return Response(user_data)
 
 
 @api_view(['GET', 'POST', 'PATCH'])
@@ -215,6 +238,5 @@ def signup(request):
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 def google_login(request):
-    adapter = GoogleOAuth2Adapter(request)
-    client = OAuth2Client(adapter, callback_url=request.build_absolute_uri('/accounts/google/login/callback/'))
-    return redirect(client.get_redirect_url())
+    google_login_url = '/accounts/google/login'
+    return HttpResponseRedirect(google_login_url)
