@@ -90,7 +90,7 @@ TEMPLATES = [
 SOCIALACCOUNT_LOGIN_ON_GET=True
 SOCIALACCOUNT_AUTO_SIGNUP = True
 ACCOUNT_EMAIL_VERIFICATION = 'none'
-# LOGIN_REDIRECT_URL = 'http://localhost:3000/signup/completeprofile/'
+LOGIN_REDIRECT_URL = 'http://localhost:3000/signup/completeprofile/'
 
 WSGI_APPLICATION = 'gamerxpo.wsgi.application'
 
