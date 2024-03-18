@@ -61,7 +61,7 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
 
 ]
-
+CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # The origin of your Next.js app
 ]
@@ -90,6 +90,7 @@ TEMPLATES = [
 SOCIALACCOUNT_LOGIN_ON_GET=True
 SOCIALACCOUNT_AUTO_SIGNUP = True
 ACCOUNT_EMAIL_VERIFICATION = 'none'
+# LOGIN_REDIRECT_URL = 'http://localhost:3000/signup/completeprofile/'
 
 WSGI_APPLICATION = 'gamerxpo.wsgi.application'
 

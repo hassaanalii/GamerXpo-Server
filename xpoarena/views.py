@@ -20,23 +20,25 @@ logger = logging.getLogger(__name__)
 
 
 @api_view(['GET'])
-def some_view(request):
+def user_details(request):
+    if not request.user.is_authenticated:
+        return Response({'error': 'User is not authenticated.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        
     user = request.user
+    print(user)
     user_data = {
         'username': user.username,
         'email': user.email,
         'first_name': user.first_name,
         'last_name': user.last_name
     }
-    
     try:
         social_account = SocialAccount.objects.get(user=user, provider='google')
         user_data['social_name'] = social_account.extra_data.get('name', '')
-        user_data['social_email'] = social_account.extra_data.get('email', '')
+        user_data['email'] = social_account.extra_data.get('email', '')
         user_data['social_picture'] = social_account.extra_data.get('picture', '')
     except SocialAccount.DoesNotExist:
-        # The user does not have a social account, no action needed
-        # as the user_data dict already contains the username and email
         pass
     
     return Response(user_data)
