@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.models import User
+
 
 def upload_to(instance, filename):
     return 'posts/{filename}'.format(filename=filename)
@@ -97,3 +99,12 @@ class BoothCustomization(models.Model):
 
     def __str__(self):
         return f"Customizations for {self.booth.name}"
+    
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    role = models.CharField(max_length=50)
+    profile_picture = models.ImageField(upload_to=upload_to, blank=True, null=True)
+    profile_picture_url = models.CharField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.user.username}'s profile"

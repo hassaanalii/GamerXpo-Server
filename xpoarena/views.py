@@ -1,9 +1,9 @@
-from rest_framework.decorators import api_view, parser_classes
+from rest_framework.decorators import api_view, parser_classes, permission_classes
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from rest_framework.response import Response
 from xpoarena.serializers import BoothSerializer, GamesSerializer, ThemeSerializer, BoothCustomizationSerializer
-from .models import Booth, Game, Theme, BoothCustomization
+from .models import Booth, Game, Theme, BoothCustomization, UserProfile
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.password_validation import validate_password
 from rest_framework.exceptions import ValidationError
@@ -14,10 +14,34 @@ from django.shortcuts import redirect
 from django.shortcuts import HttpResponseRedirect
 from allauth.socialaccount.models import SocialAccount
 import logging
+from rest_framework.permissions import IsAuthenticated
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def update_user_and_profile(request):
+    user = request.user
+
+    # Update User fields
+    user.first_name = request.data.get('first_name', user.first_name)
+    user.last_name = request.data.get('last_name', user.last_name)
+    user.save()
+
+    # Update or create UserProfile
+    profile, created = UserProfile.objects.update_or_create(
+        user=user,
+        defaults={
+            'role': request.data.get('role'),
+            'profile_picture_url': request.data.get('profile_picture_url')
+            # Note: Handling of 'profile_picture' (a file) might require additional logic
+        }
+    )
+
+    # Assuming handling for 'profile_picture' field will be added here
+
+    return Response({"message": "User and profile updated successfully."})
 
 @api_view(['GET'])
 def user_details(request):

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Booth, Game, Theme, BoothCustomization
+from .models import Booth, Game, Theme, BoothCustomization, UserProfile
 
 class BoothSerializer(serializers.ModelSerializer):
     class Meta:
@@ -21,3 +21,9 @@ class BoothCustomizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = BoothCustomization
         fields = "__all__"
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ['role', 'profile_picture', 'profile_picture_url']
+        read_only_fields = ['user']
