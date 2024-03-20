@@ -65,6 +65,8 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # The origin of your Next.js app
 ]
+CSRF_TRUSTED_ORIGINS = ['http://localhost:3000']
+
 
 ROOT_URLCONF = 'gamerxpo.urls'
 
