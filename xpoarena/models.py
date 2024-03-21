@@ -108,3 +108,17 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.username}'s profile"
+    
+class Organization(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    website_url = models.URLField(max_length=255, blank=True, null=True)
+    address = models.CharField(max_length=255, blank=True, null=True)
+    email = models.EmailField(max_length=255, blank=True, null=True)
+    logo = models.ImageField(upload_to=upload_to, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    founded_date = models.DateField(blank=True, null=True)
+    country = models.CharField(max_length=100, blank=True, null=True)
+    created_by = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
