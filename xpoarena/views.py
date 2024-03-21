@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view, parser_classes, permission_class
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from rest_framework.response import Response
-from xpoarena.serializers import BoothSerializer, GamesSerializer, ThemeSerializer, BoothCustomizationSerializer
+from xpoarena.serializers import BoothSerializer, GamesSerializer, ThemeSerializer, BoothCustomizationSerializer, OrganizationSerializer
 from .models import Booth, Game, Theme, BoothCustomization, UserProfile
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.password_validation import validate_password
@@ -18,6 +18,21 @@ from rest_framework.permissions import IsAuthenticated
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def register_organization(request):
+    data = request.data
+    data['created_by'] = request.user.pk
+    serializer = OrganizationSerializer(data=data)
+    
+    if serializer.is_valid():
+        serializer.save(created_by=request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def update_user_and_profile(request):
