@@ -18,7 +18,6 @@ from rest_framework.permissions import IsAuthenticated
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def update_user_and_profile(request):
@@ -29,19 +28,22 @@ def update_user_and_profile(request):
     user.last_name = request.data.get('last_name', user.last_name)
     user.save()
 
-    # Update or create UserProfile
-    profile, created = UserProfile.objects.update_or_create(
-        user=user,
-        defaults={
-            'role': request.data.get('role'),
-            'profile_picture_url': request.data.get('profile_picture_url')
-            # Note: Handling of 'profile_picture' (a file) might require additional logic
-        }
-    )
-
-    # Assuming handling for 'profile_picture' field will be added here
+    # Retrieve or initialize the user profile
+    profile, created = UserProfile.objects.get_or_create(user=user)
+    
+    # Update non-file fields
+    profile.role = request.data.get('role')
+    profile.profile_picture_url = request.data.get('profile_picture_url', profile.profile_picture_url)
+    
+    # Handle file field separately
+    if 'profile_picture' in request.FILES:
+        profile.profile_picture = request.FILES['profile_picture']
+    
+    profile.save()
 
     return Response({"message": "User and profile updated successfully."})
+
+
 
 @api_view(['GET'])
 def user_details(request):
