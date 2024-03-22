@@ -65,21 +65,33 @@ def user_details(request):
     if not request.user.is_authenticated:
         return Response({'error': 'User is not authenticated.'}, status=status.HTTP_401_UNAUTHORIZED)
 
-        
     user = request.user
-    print(user)
     user_data = {
         'username': user.username,
         'email': user.email,
         'first_name': user.first_name,
-        'last_name': user.last_name
+        'last_name': user.last_name,
+        'has_profile': False, 
     }
+
+    # Check for social account information
     try:
         social_account = SocialAccount.objects.get(user=user, provider='google')
-        user_data['social_name'] = social_account.extra_data.get('name', '')
-        user_data['email'] = social_account.extra_data.get('email', '')
-        user_data['social_picture'] = social_account.extra_data.get('picture', '')
+        user_data.update({
+            'social_name': social_account.extra_data.get('name', ''),
+            'email': social_account.extra_data.get('email', ''),
+            'social_picture': social_account.extra_data.get('picture', ''),
+        })
     except SocialAccount.DoesNotExist:
+        # No action needed if there is no social account
+        pass
+
+    # Check if the user has a UserProfile
+    try:
+        UserProfile.objects.get(user=user)
+        user_data['has_profile'] = True  # Update the flag if the UserProfile exists
+    except UserProfile.DoesNotExist:
+        # No action needed if there is no UserProfile
         pass
     
     return Response(user_data)
