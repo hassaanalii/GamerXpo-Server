@@ -21,6 +21,15 @@ from django.http import JsonResponse
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated]) 
+def get_usernames(request):
+    users = User.objects.all()
+    usernames = [user.username for user in users]
+    
+    return JsonResponse({'usernames': usernames})
+
+
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -71,7 +80,27 @@ def update_user_and_profile(request):
 
     return Response({"message": "User and profile updated successfully."})
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_information(request):
+    user = request.user
+    user_data = {
+        'username': user.username,
+        'email': user.email,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+    }
 
+    try:
+        profile = user.profile
+        user_data['profile_picture'] = profile.profile_picture.url if profile.profile_picture else None
+        user_data['profile_picture_url'] = profile.profile_picture_url
+    except UserProfile.DoesNotExist:
+        # Handle case where user does not have a profile yet
+        user_data['profile_picture'] = None
+        user_data['profile_picture_url'] = None
+
+    return JsonResponse(user_data)
 
 @api_view(['GET'])
 def user_details(request):
