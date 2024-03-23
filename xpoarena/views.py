@@ -14,17 +14,23 @@ from django.shortcuts import redirect
 from django.shortcuts import HttpResponseRedirect
 from allauth.socialaccount.models import SocialAccount
 import logging
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.http import JsonResponse
 
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
-@api_view(['GET', 'POST'])
-@permission_classes([IsAuthenticated])
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
 def verify_auth(request):
-    return JsonResponse({"authenticated": True})
+    if request.user.is_authenticated:
+        # User is authenticated
+        return JsonResponse({"authenticated": True})
+    else:
+        # User is not authenticated
+        return JsonResponse({"authenticated": False})
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
