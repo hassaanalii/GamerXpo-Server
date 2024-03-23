@@ -15,9 +15,16 @@ from django.shortcuts import HttpResponseRedirect
 from allauth.socialaccount.models import SocialAccount
 import logging
 from rest_framework.permissions import IsAuthenticated
+from django.http import JsonResponse
+
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def verify_auth(request):
+    return JsonResponse({"authenticated": True})
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
