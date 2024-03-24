@@ -16,10 +16,38 @@ from allauth.socialaccount.models import SocialAccount
 import logging
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.http import JsonResponse
+from django.core.exceptions import ObjectDoesNotExist
+
 
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def update_user_details(request):
+    try:
+        user = request.user
+        data = request.data
+
+        user.first_name = data.get('first_name', user.first_name)
+        user.last_name = data.get('last_name', user.last_name)
+        user.username = data.get('username', user.username)
+        
+        user.save()
+
+        return Response({
+            'message': 'User updated successfully',
+            'data': {
+                'username': user.username,
+                'first_name': user.first_name,
+                'last_name': user.last_name
+            }
+        }, status=status.HTTP_200_OK)
+    except ObjectDoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated]) 
@@ -89,12 +117,14 @@ def user_information(request):
         'email': user.email,
         'first_name': user.first_name,
         'last_name': user.last_name,
+        'role': None,
     }
 
     try:
         profile = user.profile
         user_data['profile_picture'] = profile.profile_picture.url if profile.profile_picture else None
         user_data['profile_picture_url'] = profile.profile_picture_url
+        user_data['role'] = profile.role
     except UserProfile.DoesNotExist:
         # Handle case where user does not have a profile yet
         user_data['profile_picture'] = None
