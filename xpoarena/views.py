@@ -3,7 +3,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from rest_framework.response import Response
 from xpoarena.serializers import BoothSerializer, GamesSerializer, ThemeSerializer, BoothCustomizationSerializer, OrganizationSerializer
-from .models import Booth, Game, Theme, BoothCustomization, UserProfile
+from .models import Booth, Game, Theme, BoothCustomization, UserProfile, Organization
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.password_validation import validate_password
 from rest_framework.exceptions import ValidationError
@@ -22,6 +22,18 @@ from django.core.exceptions import ObjectDoesNotExist
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_organization_details(request):
+    user = request.user
+    try:
+        # Assuming there's only one organization per user
+        organization = Organization.objects.get(created_by=user)
+        serializer = OrganizationSerializer(organization)
+        return Response(serializer.data)
+    except Organization.DoesNotExist:
+        return Response({'error': 'No organization found for user.'}, status=404)
 
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
