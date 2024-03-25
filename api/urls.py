@@ -1,4 +1,4 @@
-from xpoarena.views import booth, update_booth, games, theme, customizedBooth, user_details, update_booth_customization, update_game, login_view, signup, google_login, update_user_and_profile, register_organization, verify_auth, user_information, get_usernames, update_user_details, get_organization_details
+from xpoarena.views import booth, update_booth, games, theme, customizedBooth, user_details, update_booth_customization, update_game, login_view, signup, google_login, update_user_and_profile, register_organization, verify_auth, user_information, get_usernames, update_user_details, get_organization_details, update_organization
 from django.urls import path
 
 urlpatterns = [
@@ -20,8 +20,6 @@ urlpatterns = [
     path('usernames/', get_usernames, name='get_usernames'),
     path("updateuser/", update_user_details, name='update_user_details'),
     path("organization/", get_organization_details, name='get_organization_details'),
-
-
-    
+    path("updateorganization/", update_organization, name='update_organization'),
 
 ]

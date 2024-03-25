@@ -23,6 +23,25 @@ from django.core.exceptions import ObjectDoesNotExist
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def update_organization(request):
+    try:
+        organization = Organization.objects.get(created_by=request.user)
+    except Organization.DoesNotExist:
+        return Response({'error': 'Organization not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    # Create a serializer instance with the organization instance and the request data
+    serializer = OrganizationSerializer(organization, data=request.data, partial=True)
+    
+    # Check if the data is valid
+    if serializer.is_valid():
+        serializer.save()  # Save the updated organization
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    # If data is not valid, return the errors
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_organization_details(request):
