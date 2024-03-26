@@ -100,14 +100,7 @@ class BoothCustomization(models.Model):
     def __str__(self):
         return f"Customizations for {self.booth.name}"
     
-class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    role = models.CharField(max_length=50)
-    profile_picture = models.ImageField(upload_to=upload_to, blank=True, null=True)
-    profile_picture_url = models.CharField(max_length=255, blank=True, null=True)
 
-    def __str__(self):
-        return f"{self.user.username}'s profile"
     
 class Organization(models.Model):
     name = models.CharField(max_length=255, unique=True)
@@ -122,3 +115,14 @@ class Organization(models.Model):
 
     def __str__(self):
         return self.name
+    
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    role = models.CharField(max_length=50)
+    profile_picture = models.ImageField(upload_to=upload_to, blank=True, null=True)
+    profile_picture_url = models.CharField(max_length=255, blank=True, null=True)
+    organization = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True, blank=True, related_name='members')
+
+
+    def __str__(self):
+        return f"{self.user.username}'s profile"

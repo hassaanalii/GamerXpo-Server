@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view, parser_classes, permission_class
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from rest_framework.response import Response
-from xpoarena.serializers import BoothSerializer, GamesSerializer, ThemeSerializer, BoothCustomizationSerializer, OrganizationSerializer
+from xpoarena.serializers import BoothSerializer, GamesSerializer, ThemeSerializer, BoothCustomizationSerializer, OrganizationSerializer, UserProfileSerializer
 from .models import Booth, Game, Theme, BoothCustomization, UserProfile, Organization
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.password_validation import validate_password
@@ -16,6 +16,7 @@ from allauth.socialaccount.models import SocialAccount
 import logging
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 
 
@@ -53,6 +54,19 @@ def get_organization_details(request):
         return Response(serializer.data)
     except Organization.DoesNotExist:
         return Response({'error': 'No organization found for user.'}, status=404)
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def update_user_profile_with_organization(request, user_id):
+    try:
+        user_profile = UserProfile.objects.get(user_id=user_id)
+        organization_id = request.data.get('organization')
+        user_profile.organization_id = organization_id
+        user_profile.save()
+        return Response({"message": "UserProfile updated successfully."}, status=status.HTTP_200_OK)
+    except UserProfile.DoesNotExist:
+        return Response({"error": "UserProfile not found."}, status=status.HTTP_404_NOT_FOUND)
+
 
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
@@ -138,6 +152,17 @@ def update_user_and_profile(request):
     profile.save()
 
     return Response({"message": "User and profile updated successfully."})
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_id(request):
+    if request.user.is_authenticated:
+        user_data = {
+            'userId': request.user.id,
+        }
+        return JsonResponse(user_data)
+    else:
+        return JsonResponse({'error': 'User is not authenticated'}, status=401)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
