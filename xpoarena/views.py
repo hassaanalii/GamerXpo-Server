@@ -45,6 +45,17 @@ def update_organization(request):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
+def get_organization_id_from_userprofile(request, user_id):
+    try:
+        user_profile = UserProfile.objects.get(user_id=user_id)
+        # Assuming the UserProfile model has an organization field that is a ForeignKey to Organization
+        organization_id = user_profile.organization_id if user_profile.organization else None
+        return Response({'organization_id': organization_id})
+    except UserProfile.DoesNotExist:
+        return Response({'error': 'UserProfile not found.'}, status=404)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_organization_details(request):
     user = request.user
     try:
