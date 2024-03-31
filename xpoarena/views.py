@@ -24,6 +24,15 @@ from django.core.exceptions import ObjectDoesNotExist
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_organization_details_by_id(request, org_id):
+    # Retrieve the organization matching the provided ID
+    organization = get_object_or_404(Organization, id=org_id)
+    serializer = OrganizationSerializer(organization)
+    return Response(serializer.data)
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_user_organization_id(request):
