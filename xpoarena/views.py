@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view, parser_classes, permission_class
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from rest_framework.response import Response
-from xpoarena.serializers import BoothSerializer, GamesSerializer, ThemeSerializer, BoothCustomizationSerializer, OrganizationSerializer, UserProfileSerializer
+from xpoarena.serializers import BoothSerializer, GamesSerializer, ThemeSerializer, BoothCustomizationSerializer, OrganizationSerializer, UserProfileSerializer, MyUserProfileSerializer
 from .models import Booth, Game, Theme, BoothCustomization, UserProfile, Organization
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.password_validation import validate_password
@@ -22,30 +22,23 @@ import uuid
 
 logger = logging.getLogger(__name__)
 
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_developers(request):
     try:
-        # Retrieve the UserProfile of the authenticated user
         user_profile = UserProfile.objects.get(user=request.user)
-
-        # Check if the user has an organization
         if not user_profile.organization_id:
             return Response({'error': 'This user does not belong to any organization.'}, status=400)
 
-        # Find all UserProfiles with the same organization ID and role "Developer"
         developer_profiles = UserProfile.objects.filter(
             organization_id=user_profile.organization_id,
             role='Developer'
-        )
+        ).select_related('user')  # Optimizes the query to fetch related User data
 
-        # Serialize the queryset
-        serializer = UserProfileSerializer(developer_profiles, many=True)
+        serializer = MyUserProfileSerializer(developer_profiles, many=True)
         return Response(serializer.data)
     except UserProfile.DoesNotExist:
         return Response({'error': 'UserProfile for the user does not exist.'}, status=404)
-    
 
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
