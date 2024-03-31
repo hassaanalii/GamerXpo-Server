@@ -1,4 +1,4 @@
-from xpoarena.views import booth, update_booth, games, theme, customizedBooth, user_details, update_booth_customization, update_game, login_view, signup, google_login, update_user_and_profile, register_organization, verify_auth, user_information, get_usernames, update_user_details, get_organization_details, update_organization, get_user_id, update_user_profile_with_organization, get_organization_id_from_userprofile, get_user_organization_id, get_organization_details_by_id
+from xpoarena.views import booth, update_booth, games, theme, customizedBooth, user_details, update_booth_customization, update_game, login_view, signup, google_login, update_user_and_profile, register_organization, verify_auth, user_information, get_usernames, update_user_details, get_organization_details, update_organization, get_user_id, update_user_profile_with_organization, get_organization_id_from_userprofile, get_user_organization_id, get_organization_details_by_id, join_organization, update_organization_in_user_profile
 from django.urls import path
 
 urlpatterns = [
@@ -26,5 +26,9 @@ urlpatterns = [
     path("getorganizationid/<int:user_id>/", get_organization_id_from_userprofile, name='get_organization'),
     path("userorganization/", get_user_organization_id, name='update_organization'),
     path("organizationbyid/<int:org_id>/", get_organization_details_by_id, name='organizationbyid'),
+    path('joinorganization/', join_organization, name='join-organization'),
+    path('updateorganizationinuserprofile/', update_organization_in_user_profile, name='update-organization-in-user-profile'),
+
+
 
 ]

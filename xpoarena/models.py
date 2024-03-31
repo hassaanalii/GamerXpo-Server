@@ -111,6 +111,7 @@ class Organization(models.Model):
     description = models.TextField(blank=True, null=True)
     founded_date = models.DateField(blank=True, null=True)
     country = models.CharField(max_length=100, blank=True, null=True)
+    secret_key = models.CharField(max_length=100, unique=True)
     created_by = models.OneToOneField(User, on_delete=models.CASCADE)
 
     def __str__(self):

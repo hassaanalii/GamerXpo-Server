@@ -18,11 +18,39 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
+import uuid
 
-
-
-# Get an instance of a logger
 logger = logging.getLogger(__name__)
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def update_organization_in_user_profile(request):
+    organization_id = request.data.get('organization_id')
+    if not organization_id:
+        return Response({"error": "Organization ID is required."}, status=400)
+
+    try:
+        organization = Organization.objects.get(id=organization_id)
+        user_profile = UserProfile.objects.get(user=request.user)
+        user_profile.organization = organization
+        user_profile.save()
+        return Response({"message": "User profile updated successfully with new organization."})
+    except Organization.DoesNotExist:
+        return Response({"error": "Organization not found."}, status=404)
+    except UserProfile.DoesNotExist:
+        return Response({"error": "UserProfile not found."}, status=404)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def join_organization(request):
+    secret_key = request.data.get('secret_key')
+    if not secret_key:
+        return JsonResponse({"error": "Secret key is required."}, status=400)
+    try:
+        organization = Organization.objects.get(secret_key=secret_key)
+        return JsonResponse({"organization_id": organization.id})
+    except Organization.DoesNotExist:
+        return JsonResponse({"error": "Invalid secret key."}, status=404)
 
 
 @api_view(['GET'])
@@ -52,15 +80,12 @@ def update_organization(request):
     except Organization.DoesNotExist:
         return Response({'error': 'Organization not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-    # Create a serializer instance with the organization instance and the request data
     serializer = OrganizationSerializer(organization, data=request.data, partial=True)
     
-    # Check if the data is valid
     if serializer.is_valid():
-        serializer.save()  # Save the updated organization
+        serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-    # If data is not valid, return the errors
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
@@ -149,12 +174,14 @@ def verify_auth(request):
 @permission_classes([IsAuthenticated])
 def register_organization(request):
     data = request.data
-    data['created_by'] = request.user.pk
+    secret_key = str(uuid.uuid4())
+    data['secret_key'] = secret_key
+
     serializer = OrganizationSerializer(data=data)
-    
+
     if serializer.is_valid():
         serializer.save(created_by=request.user)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response({**serializer.data}, status=status.HTTP_201_CREATED)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
