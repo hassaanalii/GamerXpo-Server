@@ -22,6 +22,31 @@ import uuid
 
 logger = logging.getLogger(__name__)
 
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_developers(request):
+    try:
+        # Retrieve the UserProfile of the authenticated user
+        user_profile = UserProfile.objects.get(user=request.user)
+
+        # Check if the user has an organization
+        if not user_profile.organization_id:
+            return Response({'error': 'This user does not belong to any organization.'}, status=400)
+
+        # Find all UserProfiles with the same organization ID and role "Developer"
+        developer_profiles = UserProfile.objects.filter(
+            organization_id=user_profile.organization_id,
+            role='Developer'
+        )
+
+        # Serialize the queryset
+        serializer = UserProfileSerializer(developer_profiles, many=True)
+        return Response(serializer.data)
+    except UserProfile.DoesNotExist:
+        return Response({'error': 'UserProfile for the user does not exist.'}, status=404)
+    
+
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
 def update_organization_in_user_profile(request):
