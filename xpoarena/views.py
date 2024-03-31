@@ -24,6 +24,17 @@ from django.core.exceptions import ObjectDoesNotExist
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_organization_id(request):
+    # Get the UserProfile of the currently authenticated user
+    user_profile = get_object_or_404(UserProfile, user=request.user)
+    
+    # Return organization_id if it exists, otherwise return null
+    organization_id = user_profile.organization_id if user_profile.organization else None
+    return Response({'organization_id': organization_id})
+
+
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
 def update_organization(request):
