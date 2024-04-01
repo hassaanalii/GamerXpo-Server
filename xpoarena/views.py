@@ -85,13 +85,16 @@ def stripe_webhook_view(request):
             customer_email = session['customer_details']['email']
             game_id = session['metadata']['game_id']
             game = Game.objects.get(id=game_id)
+            print(customer_email)
+            print(game_id)
 
+            print(game)
             # Sending confirmation email
             send_mail(
                 subject="Payment successful",
                 message=f"Thank you for purchasing {game.title}! Here is your download link: {game.game_download_link}",
                 recipient_list=[customer_email],
-                from_email=settings.DEFAULT_FROM_EMAIL
+                from_email=settings.EMAIL_HOST_USER
             )
 
             # Create payment history
