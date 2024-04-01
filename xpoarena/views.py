@@ -22,6 +22,23 @@ import uuid
 
 logger = logging.getLogger(__name__)
 
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def remove_user_from_organization(request, user_id):
+    try:
+        user_profile = UserProfile.objects.get(user_id=user_id)
+        
+        # Check if the requesting user is allowed to remove the user
+        if request.user != user_profile.user and request.user != user_profile.organization.created_by:
+            return Response({'error': 'You do not have permission to remove this user.'}, status=status.HTTP_403_FORBIDDEN)
+        
+        user_profile.organization_id = None
+        user_profile.save()
+        return Response({'message': 'User removed from the organization successfully.'})
+    except UserProfile.DoesNotExist:
+        return Response({'error': 'UserProfile not found.'}, status=status.HTTP_404_NOT_FOUND)
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_developers(request):
