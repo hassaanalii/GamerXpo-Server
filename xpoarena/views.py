@@ -3,7 +3,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from rest_framework.response import Response
 from xpoarena.serializers import BoothSerializer, GamesSerializer, ThemeSerializer, BoothCustomizationSerializer, OrganizationSerializer, UserProfileSerializer, MyUserProfileSerializer
-from .models import Booth, Game, Theme, BoothCustomization, UserProfile, Organization
+from .models import Booth, Game, Theme, BoothCustomization, UserProfile, Organization, PaymentHistory
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.password_validation import validate_password
 from rest_framework.exceptions import ValidationError
@@ -15,12 +15,93 @@ from django.shortcuts import HttpResponseRedirect
 from allauth.socialaccount.models import SocialAccount
 import logging
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 import uuid
+import stripe
+from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.core.mail import send_mail
 
 logger = logging.getLogger(__name__)
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+API_URL = "http://localhost:8000"
+
+@api_view(['POST'])
+def create_checkout_session(request, pk):
+    try:
+        game = Game.objects.get(id=pk)
+        checkout_session = stripe.checkout.Session.create(
+            line_items=[
+                {
+                    'price_data': {
+                        'currency': 'usd',
+                        'unit_amount': int(game.price * 100),
+                        'product_data': {
+                            'name': game.title,
+                            'images': [game.image.url if game.image else None],
+                        },
+                    },
+                    'quantity': 1,
+                },
+            ],
+            metadata={
+                "game_id": game.id
+            },
+            mode='payment',
+            success_url=settings.SITE_URL + '?success=true',
+            cancel_url=settings.SITE_URL + '?canceled=true',
+        )
+        return Response({'url': checkout_session.url})
+    except Game.DoesNotExist:
+        return Response({'error': 'Game not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': 'Something went wrong while creating Stripe session', 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+@api_view(['POST'])
+def stripe_webhook_view(request):
+    if request.method == 'POST':
+        payload = request.body
+        sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
+        event = None
+
+        try:
+            event = stripe.Webhook.construct_event(
+                payload, sig_header, settings.STRIPE_SECRET_WEBHOOK
+            )
+        except ValueError as e:
+            return HttpResponse('Invalid payload', status=400)
+        except stripe.error.SignatureVerificationError as e:
+            return HttpResponse('Invalid signature', status=400)
+
+        if event['type'] == 'checkout.session.completed':
+            session = event['data']['object']
+            customer_email = session['customer_details']['email']
+            game_id = session['metadata']['game_id']
+            game = Game.objects.get(id=game_id)
+
+            # Sending confirmation email
+            send_mail(
+                subject="Payment successful",
+                message=f"Thank you for purchasing {game.title}! Here is your download link: {game.game_download_link}",
+                recipient_list=[customer_email],
+                from_email=settings.DEFAULT_FROM_EMAIL
+            )
+
+            # Create payment history
+            PaymentHistory.objects.create(game=game, payment_status=True)
+
+            return HttpResponse('Webhook handled', status=200)
+
+        # Other webhook events...
+        return HttpResponse('Webhook received', status=200)
+    return HttpResponse('Method not allowed', status=405)
 
 
 @api_view(['PATCH'])
