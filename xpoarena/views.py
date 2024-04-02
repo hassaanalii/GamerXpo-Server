@@ -24,6 +24,7 @@ from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.core.mail import send_mail
+from django.db.models import Q
 
 logger = logging.getLogger(__name__)
 
@@ -401,23 +402,39 @@ def user_details(request):
     
     return Response(user_data)
 
-
 @api_view(['GET', 'POST', 'PATCH'])
-@parser_classes([MultiPartParser, FormParser])  
-
+@parser_classes([MultiPartParser, FormParser])
 def booth(request):
     if request.method == 'GET':
-        if request.query_params:
-            id = request.GET.get('id')
-            object = Booth.objects.get(id=id)
+        # Check if an 'id' parameter is provided in the query string
+        id = request.GET.get('id')
+        # Additionally, check for a 'query' parameter for filtering by name or any other field
+        query = request.GET.get('query')
+
+        if id:
+            # Fetch a specific booth by id
+            try:
+                object = Booth.objects.get(id=id)
+            except Booth.DoesNotExist:
+                return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
             serializer = BoothSerializer(object)
             return Response(serializer.data)
+
+        elif query:
+            # Filter booths based on the provided query parameter
+            objects = Booth.objects.filter(Q(name__icontains=query))
+            serializer = BoothSerializer(objects, many=True)
+            return Response(serializer.data)
+
         else:
+            # Return all booths if no 'id' or 'query' parameter is provided
             objects = Booth.objects.all()
             serializer = BoothSerializer(objects, many=True)
             return Response(serializer.data)
 
     elif request.method == 'POST':
+        # Handling POST request logic remains unchanged
         data = request.data
         serializer = BoothSerializer(data=data)
         if serializer.is_valid():
@@ -425,7 +442,6 @@ def booth(request):
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 @api_view(['GET', 'POST', 'PATCH'])
 @parser_classes([MultiPartParser, FormParser])  
