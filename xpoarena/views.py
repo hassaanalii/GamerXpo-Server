@@ -31,6 +31,20 @@ logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
 API_URL = "http://localhost:8000"
 
+
+@api_view(['GET'])
+def get_games_by_booth_and_genre(request):
+    booth_id = request.query_params.get('booth_id')
+    genre = request.query_params.get('genre')
+    
+    if booth_id is None or genre is None:
+        return Response({'error': 'Missing parameters'}, status=status.HTTP_400_BAD_REQUEST)
+
+    games = Game.objects.filter(booth_id=booth_id, genre=genre)
+    serializer = GamesSerializer(games, many=True)
+    
+    return Response(serializer.data)
+
 @api_view(['POST'])
 def create_checkout_session(request, pk):
     try:
