@@ -75,8 +75,8 @@ CORS_ALLOWED_ORIGINS = [
 CSRF_TRUSTED_ORIGINS = ['http://localhost:3000']
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),  # Token is valid for 30 minutes
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),     # Token can be refreshed within 1 day
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Token is valid for 30 minutes
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),     # Token can be refreshed within 1 day
     'ROTATE_REFRESH_TOKENS': True,                   # Rotate refresh tokens upon each request
     'BLACKLIST_AFTER_ROTATION': True,                # Blacklist old tokens after rotation
 }
