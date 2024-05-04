@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
 API_URL = "http://localhost:8000"
 
-def authenticate(request):
+def authenticate_for_token(request):
     user = request.user
     if user.is_authenticated:
         refresh = RefreshToken.for_user(user)
@@ -607,18 +607,29 @@ def login_view(request):
     username = request.data.get('username')
     password = request.data.get('password')
     user = authenticate(request, username=username, password=password)
+    
     if user is not None:
         login(request, user)
+
+        # Generate tokens
+        refresh = RefreshToken.for_user(user)
+        access_token = refresh.access_token
+
         try:
             UserProfile.objects.get(user=user)
             has_profile = True
         except UserProfile.DoesNotExist:
             has_profile = False
-        return Response({"detail": "Login successful", "has_profile": has_profile}, status=200)
+
+        return Response({
+            "detail": "Login successful",
+            "has_profile": has_profile,
+            "access": str(access_token),
+            "refresh": str(refresh)
+        }, status=200)
     else:
         return Response({"detail": "Invalid credentials"}, status=400)
     
-
 @api_view(['POST'])
 def signup(request):
     username = request.data.get('username')
@@ -636,13 +647,7 @@ def signup(request):
         # Create a new user. Note: You should handle more cases here, such as existing users.
         user = User.objects.create_user(username=username, email=email, password=password1)
         user.save()
-        refresh = RefreshToken.for_user(user)
-        return Response({
-            "detail": "Signup successful",
-            "refresh": str(refresh),
-            "access": str(refresh.access_token),
-        }, status=status.HTTP_201_CREATED)
-    
+        return Response({"detail": "Signup successful"}, status=status.HTTP_201_CREATED)
     except ValidationError as e:
         logger.error(f"Validation error during signup: {e.messages}")
         return Response({"error": e.messages}, status=status.HTTP_400_BAD_REQUEST)
