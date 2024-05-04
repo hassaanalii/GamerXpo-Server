@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+from datetime import timedelta
 import os
 from pathlib import Path
 
@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'rest_framework_simplejwt.token_blacklist',
     
 ]
 
@@ -63,6 +64,7 @@ MIDDLEWARE = [
 ]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ],
 }
@@ -72,6 +74,12 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CSRF_TRUSTED_ORIGINS = ['http://localhost:3000']
 
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),  # Token is valid for 30 minutes
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),     # Token can be refreshed within 1 day
+    'ROTATE_REFRESH_TOKENS': True,                   # Rotate refresh tokens upon each request
+    'BLACKLIST_AFTER_ROTATION': True,                # Blacklist old tokens after rotation
+}
 
 
 ROOT_URLCONF = 'gamerxpo.urls'
@@ -98,7 +106,7 @@ TEMPLATES = [
 SOCIALACCOUNT_LOGIN_ON_GET=True
 SOCIALACCOUNT_AUTO_SIGNUP = True
 ACCOUNT_EMAIL_VERIFICATION = 'none'
-LOGIN_REDIRECT_URL = 'http://localhost:3000/signup/completeprofile/'
+LOGIN_REDIRECT_URL = 'http://localhost:8000/api/authenticate/'
 
 WSGI_APPLICATION = 'gamerxpo.wsgi.application'
 

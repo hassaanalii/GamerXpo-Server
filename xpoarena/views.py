@@ -25,12 +25,24 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.core.mail import send_mail
 from django.db.models import Q
+from rest_framework_simplejwt.tokens import RefreshToken
+
 
 logger = logging.getLogger(__name__)
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 API_URL = "http://localhost:8000"
 
+def authenticate(request):
+    user = request.user
+    if user.is_authenticated:
+        refresh = RefreshToken.for_user(user)
+        access_token = refresh.access_token
+        # Redirect to your frontend with the token
+        frontend_url = f"http://localhost:3000/signup/completeprofile/?access={access_token}&refresh={refresh}"
+        return redirect(frontend_url)
+    else:
+        return redirect('login')
 
 @api_view(['GET'])
 def get_games_by_booth_and_genre(request):
@@ -624,7 +636,13 @@ def signup(request):
         # Create a new user. Note: You should handle more cases here, such as existing users.
         user = User.objects.create_user(username=username, email=email, password=password1)
         user.save()
-        return Response({"detail": "Signup successful"}, status=status.HTTP_201_CREATED)
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            "detail": "Signup successful",
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+        }, status=status.HTTP_201_CREATED)
+    
     except ValidationError as e:
         logger.error(f"Validation error during signup: {e.messages}")
         return Response({"error": e.messages}, status=status.HTTP_400_BAD_REQUEST)
