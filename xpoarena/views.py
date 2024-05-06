@@ -43,6 +43,19 @@ def authenticate_for_token(request):
         return redirect(frontend_url)
     else:
         return redirect('login')
+    
+@api_view(['GET'])
+
+def get_user_role(request, user_id):
+    try:
+        # Retrieve the UserProfile object that matches the user_id
+        user_profile = UserProfile.objects.get(user_id=user_id)
+        
+        # Return the Role field from the UserProfile
+        return Response({'role': user_profile.role})
+    except UserProfile.DoesNotExist:
+        # If no UserProfile exists for the user_id, return an error message
+        return Response({'error': 'UserProfile not found.'}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['GET'])
 def get_games_by_booth_and_genre(request):
