@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Booth, Game, Theme, BoothCustomization, UserProfile, Organization
+from .models import *
 from django.contrib.auth.models import User
 
 
@@ -17,6 +17,11 @@ class GamesSerializer(serializers.ModelSerializer):
 class ThemeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Theme
+        fields = "__all__"
+
+class EventSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Event
         fields = "__all__"
 
 class BoothCustomizationSerializer(serializers.ModelSerializer):

@@ -117,6 +117,20 @@ class Organization(models.Model):
     def __str__(self):
         return self.name
     
+
+class Event(models.Model):
+    eventName = models.CharField(max_length=255)
+    description = models.TextField()
+    dateOfEvent = models.DateField()
+    startTime = models.TimeField()
+    endTime = models.TimeField()
+    image = models.ImageField(upload_to=upload_to)
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.eventName
+    
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     role = models.CharField(max_length=50)

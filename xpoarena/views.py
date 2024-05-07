@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view, parser_classes, permission_class
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from rest_framework.response import Response
-from xpoarena.serializers import BoothSerializer, GamesSerializer, ThemeSerializer, BoothCustomizationSerializer, OrganizationSerializer, UserProfileSerializer, MyUserProfileSerializer
+from xpoarena.serializers import *
 from .models import Booth, Game, Theme, BoothCustomization, UserProfile, Organization, PaymentHistory
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.password_validation import validate_password
@@ -43,6 +43,35 @@ def authenticate_for_token(request):
         return redirect(frontend_url)
     else:
         return redirect('login')
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_event(request):
+    user = request.user  # Retrieve the authenticated user
+    try:
+        # Get the organization where the current user is the creator
+        organization = Organization.objects.get(created_by=user)
+
+        # Extract event data from request data
+        event_data = {
+            'eventName': request.data.get('eventName'),
+            'description': request.data.get('description'),
+            'dateOfEvent': request.data.get('dateOfEvent'),
+            'startTime': request.data.get('startTime'),
+            'endTime': request.data.get('endTime'),
+            'image': request.FILES.get('image'),
+            'organization': organization.id  # Set the organization ID
+        }
+
+        # Serialize data
+        serializer = EventSerializer(data=event_data)
+        if serializer.is_valid():
+            serializer.save()  # Save if valid
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    except Organization.DoesNotExist:
+        return Response({'error': 'Organization not found for this user.'}, status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['GET'])
