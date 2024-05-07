@@ -43,19 +43,56 @@ def authenticate_for_token(request):
         return redirect(frontend_url)
     else:
         return redirect('login')
-    
-@api_view(['GET'])
 
-def get_user_role(request, user_id):
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_profile_picture(request, username):
     try:
-        # Retrieve the UserProfile object that matches the user_id
-        user_profile = UserProfile.objects.get(user_id=user_id)
+        # Retrieve the User object based on the username
+        user = User.objects.get(username=username)
+
+        # Retrieve the UserProfile object linked to the User
+        user_profile = UserProfile.objects.get(user=user)
+
+        # Check the profile_picture field
+        if user_profile.profile_picture and hasattr(user_profile.profile_picture, 'url'):
+            return Response({'profile_picture': request.build_absolute_uri(user_profile.profile_picture.url)})
+
+        # If profile_picture is not set, check profile_picture_url
+        if user_profile.profile_picture_url:
+            if user_profile.profile_picture_url.lower() != "null":
+                return Response({'profile_picture_url': user_profile.profile_picture_url})
+            else:
+                return Response({'message': 'No images'})
+
+        # If both are empty or null
+        return Response({'message': 'No images'})
+
+    except User.DoesNotExist:
+        return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+    except UserProfile.DoesNotExist:
+        return Response({'error': 'UserProfile not found.'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_role_by_username(request, username):
+    try:
+        user = User.objects.get(username=username)
+        user_profile = UserProfile.objects.get(user_id=user.id)
         
         # Return the Role field from the UserProfile
         return Response({'role': user_profile.role})
+    except User.DoesNotExist:
+        # If no User exists with the given username, return an error message
+        return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
     except UserProfile.DoesNotExist:
-        # If no UserProfile exists for the user_id, return an error message
+        # If no UserProfile exists for the user, return an error message
         return Response({'error': 'UserProfile not found.'}, status=status.HTTP_404_NOT_FOUND)
+
 
 @api_view(['GET'])
 def get_games_by_booth_and_genre(request):
@@ -370,12 +407,14 @@ def update_user_and_profile(request):
 
     return Response({"message": "User and profile updated successfully."})
 
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def get_user_id(request):
+def get_user_id_and_username(request):
     if request.user.is_authenticated:
         user_data = {
             'userId': request.user.id,
+            'username': request.user.username,  # Adding the username to the response
         }
         return JsonResponse(user_data)
     else:
