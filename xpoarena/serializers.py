@@ -19,10 +19,7 @@ class ThemeSerializer(serializers.ModelSerializer):
         model = Theme
         fields = "__all__"
 
-class EventSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Event
-        fields = "__all__"
+
 
 class BoothCustomizationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -42,6 +39,12 @@ class OrganizationSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'created_by': {'read_only': True},
         }
+
+class EventSerializer(serializers.ModelSerializer):
+    organization = OrganizationSerializer() 
+    class Meta:
+        model = Event
+        fields = "__all__"
 
 
 class UserSerializer(serializers.ModelSerializer):

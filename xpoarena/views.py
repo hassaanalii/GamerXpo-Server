@@ -44,6 +44,19 @@ def authenticate_for_token(request):
     else:
         return redirect('login')
     
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_all_events(request):
+    try:
+        # Fetch all events with their associated organizations
+        events = Event.objects.select_related('organization').all()
+
+        # Serialize the event data
+        serializer = EventSerializer(events, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Exception as e:
+        # Catch any other exceptions
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -59,6 +72,42 @@ def get_lead_events(request, username):
 
         # Fetch all events associated with this organization
         events = Event.objects.filter(organization=organization.id)
+        print(events)
+
+        # Serialize the event data
+        serializer = EventSerializer(events, many=True)
+        print(serializer.data)
+        return Response(serializer.data)
+    except User.DoesNotExist:
+        return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+    except Organization.DoesNotExist:
+        return Response({'error': 'No organization found for this user.'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        # Catch any other exceptions
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_developer_events(request, username):
+    try:
+        # Find the user by username
+        user = User.objects.get(username=username)
+        print(user.id)
+
+        user_profile = UserProfile.objects.get(user=user.id)
+        print(user_profile.organization)
+        if user_profile.organization is None:
+            return Response({"message": "This developer is not associated with any organization."}, status=status.HTTP_200_OK)
+      
+        organization_id = user_profile.organization.id
+        print(organization_id)
+      
+        
+        # Fetch all events associated with this organization
+        events = Event.objects.filter(organization=organization_id)
         print(events)
 
         # Serialize the event data

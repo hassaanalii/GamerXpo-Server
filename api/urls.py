@@ -45,6 +45,7 @@ urlpatterns = [
      path('user/<str:username>/profile_picture/', get_user_profile_picture, name='get_user_profile_picture'),
      path('createevent/', create_event, name='create_event'),
      path('user/<str:username>/leadevents/', get_lead_events, name='get_lead_events'),
-
+     path('user/<str:username>/devevents/', get_developer_events, name='get_developer_events'),
+     path('getevents/', get_all_events, name='get_all_events'),
 
 ]
