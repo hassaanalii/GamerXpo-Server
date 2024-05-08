@@ -47,5 +47,7 @@ urlpatterns = [
      path('user/<str:username>/leadevents/', get_lead_events, name='get_lead_events'),
      path('user/<str:username>/devevents/', get_developer_events, name='get_developer_events'),
      path('getevents/', get_all_events, name='get_all_events'),
+     path('getevent/<int:event_id>/', get_event_by_id, name='getevent_by_id'),
+
 
 ]

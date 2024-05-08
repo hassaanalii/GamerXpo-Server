@@ -60,6 +60,21 @@ def get_all_events(request):
         # Catch any other exceptions
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@api_view(['GET'])
+def get_event_by_id(request, event_id):
+    try:
+        # Fetch the event by ID with its associated organization
+        event = Event.objects.select_related('organization').get(id=event_id)
+
+        # Serialize the event data
+        serializer = EventSerializer(event)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Event.DoesNotExist:
+        # Return an error if the event is not found
+        return Response({'error': 'Event not found.'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        # Catch any other exceptions
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
