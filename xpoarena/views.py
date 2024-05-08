@@ -54,6 +54,7 @@ def get_all_events(request):
 
         # Serialize the event data
         serializer = EventSerializer(events, many=True)
+        print(serializer.data)
         return Response(serializer.data, status=status.HTTP_200_OK)
     except Exception as e:
         # Catch any other exceptions

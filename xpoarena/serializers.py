@@ -41,6 +41,7 @@ class OrganizationSerializer(serializers.ModelSerializer):
         }
 
 class EventSerializer(serializers.ModelSerializer):
+    organization = OrganizationSerializer()     
     class Meta:
         model = Event
         fields = "__all__"
