@@ -43,6 +43,37 @@ def authenticate_for_token(request):
         return redirect(frontend_url)
     else:
         return redirect('login')
+    
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_lead_events(request, username):
+    try:
+        # Find the user by username
+        user = User.objects.get(username=username)
+        print(user.id)
+
+        # Retrieve the organization created by the user
+        organization = Organization.objects.get(created_by=user.id)
+        print(organization.id)
+
+        # Fetch all events associated with this organization
+        events = Event.objects.filter(organization=organization.id)
+        print(events)
+
+        # Serialize the event data
+        serializer = EventSerializer(events, many=True)
+        print(serializer.data)
+        return Response(serializer.data)
+    except User.DoesNotExist:
+        return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+    except Organization.DoesNotExist:
+        return Response({'error': 'No organization found for this user.'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        # Catch any other exceptions
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_event(request):

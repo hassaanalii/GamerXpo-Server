@@ -44,6 +44,7 @@ urlpatterns = [
      path('user/<str:username>/', get_user_role_by_username, name='get_user_role'),
      path('user/<str:username>/profile_picture/', get_user_profile_picture, name='get_user_profile_picture'),
      path('createevent/', create_event, name='create_event'),
+     path('user/<str:username>/leadevents/', get_lead_events, name='get_lead_events'),
 
 
 ]
