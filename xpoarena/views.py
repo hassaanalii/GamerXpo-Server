@@ -44,6 +44,7 @@ def authenticate_for_token(request):
     else:
         return redirect('login')
     
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_all_events(request):
@@ -58,6 +59,7 @@ def get_all_events(request):
         # Catch any other exceptions
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+        
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_lead_events(request, username):
@@ -122,7 +124,6 @@ def get_developer_events(request, username):
         # Catch any other exceptions
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_event(request):
@@ -138,21 +139,21 @@ def create_event(request):
             'dateOfEvent': request.data.get('dateOfEvent'),
             'startTime': request.data.get('startTime'),
             'endTime': request.data.get('endTime'),
-            'image': request.FILES.get('image'),
-            'organization': organization.id  # Set the organization ID
+            'image': request.FILES.get('image')
         }
 
-        # Serialize data
-        serializer = EventSerializer(data=event_data)
+        # Serialize data with custom serializer
+        serializer = CreateEventSerializer(data=event_data, context={'organization_id': organization.id})
         if serializer.is_valid():
-            serializer.save()  # Save if valid
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            event = serializer.save()  # Save if valid
+            # Use the full EventSerializer to return the created event with organization details
+            event_serializer = EventSerializer(event)
+            return Response(event_serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     except Organization.DoesNotExist:
         return Response({'error': 'Organization not found for this user.'}, status=status.HTTP_404_NOT_FOUND)
-
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

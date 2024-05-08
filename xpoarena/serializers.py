@@ -41,10 +41,20 @@ class OrganizationSerializer(serializers.ModelSerializer):
         }
 
 class EventSerializer(serializers.ModelSerializer):
-    organization = OrganizationSerializer() 
     class Meta:
         model = Event
         fields = "__all__"
+
+class CreateEventSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Event
+        fields = ['eventName', 'description', 'dateOfEvent', 'startTime', 'endTime', 'image']
+
+    def create(self, validated_data):
+        organization_id = self.context['organization_id']
+        organization = Organization.objects.get(id=organization_id)
+        event = Event.objects.create(organization=organization, **validated_data)
+        return event
 
 
 class UserSerializer(serializers.ModelSerializer):
