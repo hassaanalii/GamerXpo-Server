@@ -3,6 +3,7 @@ from .models import *
 from django.contrib.auth.models import User
 
 
+
 class BoothSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booth
@@ -49,7 +50,7 @@ class EventSerializer(serializers.ModelSerializer):
 class CreateEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
-        fields = ['eventName', 'description', 'dateOfEvent', 'startTime', 'endTime', 'image']
+        fields = ['eventName', 'description', 'dateOfEvent', 'startTime', 'endTime', 'image', 'room_id']
 
     def create(self, validated_data):
         organization_id = self.context['organization_id']

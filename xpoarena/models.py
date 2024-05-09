@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
+import uuid
 
 
 def upload_to(instance, filename):
@@ -126,6 +127,8 @@ class Event(models.Model):
     endTime = models.TimeField()
     image = models.ImageField(upload_to=upload_to)
     organization = models.ForeignKey('Organization', on_delete=models.CASCADE)
+    room_id = models.CharField(max_length=100, unique=True)
+
 
     def __str__(self):
         return self.eventName

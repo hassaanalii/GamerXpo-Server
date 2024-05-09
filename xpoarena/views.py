@@ -147,7 +147,7 @@ def create_event(request):
     try:
         # Get the organization where the current user is the creator
         organization = Organization.objects.get(created_by=user)
-
+        room_id = str(uuid.uuid4())
         # Extract event data from request data
         event_data = {
             'eventName': request.data.get('eventName'),
@@ -155,7 +155,8 @@ def create_event(request):
             'dateOfEvent': request.data.get('dateOfEvent'),
             'startTime': request.data.get('startTime'),
             'endTime': request.data.get('endTime'),
-            'image': request.FILES.get('image')
+            'image': request.FILES.get('image'),
+            'room_id': room_id,
         }
 
         # Serialize data with custom serializer
