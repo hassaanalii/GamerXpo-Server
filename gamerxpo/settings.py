@@ -28,10 +28,17 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['localhost']
 
+CHANNEL_LAYERS = {
+    'default':{
+        'BACKEND': 'channels.layers.InMemoryChannelLayer'
+    }
+}
+
 
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -109,6 +116,7 @@ ACCOUNT_EMAIL_VERIFICATION = 'none'
 LOGIN_REDIRECT_URL = 'http://localhost:8000/api/authenticate/'
 
 WSGI_APPLICATION = 'gamerxpo.wsgi.application'
+ASGI_APPLICATION = 'gamerxpo.asgi.application'
 
 
 # Database
