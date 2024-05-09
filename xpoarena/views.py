@@ -47,7 +47,7 @@ def authenticate_for_token(request):
 @api_view(['GET'])
 def conversations_list(request):
     serializer = ConversationListSerializer(request.user.conversations.all(), many=True)
-    return JsonResponse(serializer.data)
+    return JsonResponse(serializer.data, safe=False)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
