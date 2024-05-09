@@ -48,6 +48,7 @@ urlpatterns = [
      path('user/<str:username>/devevents/', get_developer_events, name='get_developer_events'),
      path('getevents/', get_all_events, name='get_all_events'),
      path('getevent/<int:event_id>/', get_event_by_id, name='getevent_by_id'),
+     path('conversations/', conversations_list, name='api_conversations_list')
 
 
 ]

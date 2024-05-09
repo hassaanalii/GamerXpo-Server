@@ -70,3 +70,12 @@ class MyUserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = ('user', 'profile_picture', 'profile_picture_url', 'role')
+
+
+class ConversationListSerializer(serializers.ModelSerializer):
+    users = UserSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Conversation
+        fields = ('id', 'users', 'modified_at')
+
