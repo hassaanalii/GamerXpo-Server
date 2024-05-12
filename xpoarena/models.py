@@ -30,7 +30,7 @@ class Company(models.Model):
         return self.name
 
 class Booth(models.Model):
-    company = models.OneToOneField('Company', on_delete=models.CASCADE, null=True, blank=True)
+    organization = models.OneToOneField('Organization', on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField()
     image = models.ImageField(_("Image"), upload_to=upload_to)

@@ -83,6 +83,19 @@ def conversations_start(request, user_id):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
+def check_booth_association(request, organization_id):
+    try:
+        # Check if there is any Booth associated with the given organization_id
+        is_associated = Booth.objects.filter(organization_id=organization_id).exists()
+
+        # Return the response
+        return Response({"is_associated": is_associated}, status=status.HTTP_200_OK)
+    except Exception as e:
+        # Catch any other exceptions
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_all_events(request):
     try:
         # Fetch all events with their associated organizations

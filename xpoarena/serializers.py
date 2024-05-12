@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 class BoothSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booth
-        fields = ['id','company', 'name', 'description', 'image', 'created_at']
+        fields = "__all__"
 
    
 class GamesSerializer(serializers.ModelSerializer):
