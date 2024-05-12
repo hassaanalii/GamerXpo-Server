@@ -50,7 +50,7 @@ urlpatterns = [
      path('getevent/<int:event_id>/', get_event_by_id, name='getevent_by_id'),
      path('conversations/', conversations_list, name='api_conversations_list'),
      path('conversations/<uuid:pk>/', conversations_detail, name="api_conversations_detail"),
-     path('conversations/start/<uuid:user_id>/', conversations_start, name="api_conversations_start"),
+     path('conversations/start/<int:user_id>/', conversations_start, name="api_conversations_start"),
 
 
 ]
