@@ -3,11 +3,20 @@ from .models import *
 from django.contrib.auth.models import User
 
 
-
 class BoothSerializer(serializers.ModelSerializer):
+    organization_name = serializers.SerializerMethodField()
+    games_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Booth
-        fields = "__all__"
+        fields = ['id', 'name', 'description', 'image', 'created_at', 'organization', 'organization_name', 'games_count']
+
+    def get_organization_name(self, obj):
+        return obj.organization.name if obj.organization else None
+
+    def get_games_count(self, obj):
+        # Count the number of games associated with the booth
+        return obj.games.count()
 
    
 class GamesSerializer(serializers.ModelSerializer):

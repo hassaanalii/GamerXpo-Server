@@ -61,6 +61,8 @@ urlpatterns = [
      path('feedbacks/<int:feedback_id>/delete/',
          delete_feedback, name='delete_feedback'),
      path('get-game-id/<str:title>/', get_game_id, name='get-game-id'),
+     path('editevent/<int:pk>/', event_edit, name='editevent'),
+
 
 
 

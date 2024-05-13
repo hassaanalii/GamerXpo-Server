@@ -27,6 +27,8 @@ from django.core.mail import send_mail
 from django.db.models import Q
 from rest_framework_simplejwt.tokens import RefreshToken
 from urllib.parse import unquote
+from rest_framework.parsers import JSONParser
+
 
 
 
@@ -82,6 +84,23 @@ def conversations_start(request, user_id):
         conversation.users.add(user)
 
         return JsonResponse({'success': True, 'conversation_id': conversation.id})
+
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def event_edit(request, pk):
+    try:
+        event = Event.objects.get(pk=pk)
+    except Event.DoesNotExist:
+        return JsonResponse({'message': 'The event does not exist'}, status=404)
+
+    if request.method == 'PATCH':
+        data = JSONParser().parse(request)
+        serializer = EventSerializer(event, data=data, partial=True)  # Allow partial updates
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
