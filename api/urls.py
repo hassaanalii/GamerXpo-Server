@@ -53,6 +53,13 @@ urlpatterns = [
      path('conversations/start/<int:user_id>/', conversations_start, name="api_conversations_start"),
      path('check-booth-association/<int:organization_id>/', check_booth_association, name='check-booth-association'),
      path('get-booth-organization/<int:booth_id>/', get_booth_organization, name='get_booth_organization'),
+     path('games/<int:game_id>/feedbacks/', get_feedbacks, name='get_feedbacks'),
+     path('games/<int:game_id>/feedbacks/create/',
+         create_feedback, name='create_feedback'),
+     path('feedbacks/<int:feedback_id>/update/',
+         update_feedback, name='update_feedback'),
+     path('feedbacks/<int:feedback_id>/delete/',
+         delete_feedback, name='delete_feedback'),
 
 
 

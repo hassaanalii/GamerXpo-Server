@@ -173,3 +173,15 @@ class PaymentHistory(models.Model):
 
     def __str__(self):
         return self.game.name
+
+
+class GameFeedback(models.Model):
+    game = models.ForeignKey(
+        Game, on_delete=models.CASCADE, related_name='feedbacks')
+    feedback_text = models.TextField()
+    created_at = models.DateTimeField(default=timezone.now)
+    submitted_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def __str__(self):
+        return f"Feedback for {self.game.title} by {self.submitted_by.username if self.submitted_by else 'Anonymous'}"

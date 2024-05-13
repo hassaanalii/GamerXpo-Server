@@ -82,7 +82,50 @@ def conversations_start(request, user_id):
         return JsonResponse({'success': True, 'conversation_id': conversation.id})
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_feedback(request, game_id):
+    data = {
+        'game': game_id,
+        'feedback_text': request.data.get('feedback_text'),
+        'submitted_by': request.user.id
+    }
+    serializer = GameFeedbackSerializer(
+        data=data, context={'request': request})
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_feedbacks(request, game_id):
+    feedbacks = GameFeedback.objects.filter(game_id=game_id)
+    serializer = GameFeedbackSerializer(feedbacks, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['PATCH'])
+# @permission_classes([IsAuthenticated])
+def update_feedback(request, feedback_id):
+    feedback = get_object_or_404(
+        GameFeedback, pk=feedback_id, submitted_by=request.user)
+    serializer = GameFeedbackSerializer(
+        feedback, data=request.data, partial=True, context={'request': request})
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['DELETE'])
+# @permission_classes([IsAuthenticated])
+def delete_feedback(request, feedback_id):
+    feedback = get_object_or_404(
+        GameFeedback, pk=feedback_id, submitted_by=request.user)
+    feedback.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

@@ -94,3 +94,16 @@ class ConversationMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ConversationMessage
         fields = ('id', 'body', 'sent_to', 'created_by',)
+
+class GameFeedbackSerializer(serializers.ModelSerializer):
+    # User details are not editable
+    submitted_by = UserSerializer(read_only=True)
+
+    class Meta:
+        model = GameFeedback
+        fields = ['id', 'game', 'feedback_text', 'created_at', 'submitted_by']
+        read_only_fields = ['created_at', 'submitted_by']
+
+    def create(self, validated_data):
+        # The user is added automatically in the view
+        return super().create(validated_data)
