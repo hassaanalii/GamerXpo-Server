@@ -81,6 +81,25 @@ def conversations_start(request, user_id):
 
         return JsonResponse({'success': True, 'conversation_id': conversation.id})
 
+
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_booth_organization(request, booth_id):
+    try:
+        # Get the booth object
+        booth = get_object_or_404(Booth, id=booth_id)
+        
+        # Check if the booth has an associated organization
+        organization_id = booth.organization.id if booth.organization else None
+        
+        # Return the response
+        return Response({"organization_id": organization_id}, status=status.HTTP_200_OK)
+    except Exception as e:
+        # Catch any other exceptions
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def check_booth_association(request, organization_id):

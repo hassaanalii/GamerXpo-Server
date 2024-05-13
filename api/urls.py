@@ -52,6 +52,8 @@ urlpatterns = [
      path('conversations/<uuid:pk>/', conversations_detail, name="api_conversations_detail"),
      path('conversations/start/<int:user_id>/', conversations_start, name="api_conversations_start"),
      path('check-booth-association/<int:organization_id>/', check_booth_association, name='check-booth-association'),
+     path('get-booth-organization/<int:booth_id>/', get_booth_organization, name='get_booth_organization'),
+
 
 
 ]
