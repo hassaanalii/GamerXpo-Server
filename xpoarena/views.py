@@ -26,6 +26,8 @@ from django.utils.decorators import method_decorator
 from django.core.mail import send_mail
 from django.db.models import Q
 from rest_framework_simplejwt.tokens import RefreshToken
+from urllib.parse import unquote
+
 
 
 logger = logging.getLogger(__name__)
@@ -81,17 +83,35 @@ def conversations_start(request, user_id):
 
         return JsonResponse({'success': True, 'conversation_id': conversation.id})
 
-
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_game_id(request, title):
+    try:
+        # Decode the URL-encoded title
+        decoded_title = unquote(title)
+        
+        # Retrieve the game using the decoded title
+        game = get_object_or_404(Game, title=decoded_title)
+        
+        # Return the game ID
+        return Response({"game_id": game.id}, status=status.HTTP_200_OK)
+    except Exception as e:
+        # Catch any other exceptions
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_feedback(request, game_id):
+    game = get_object_or_404(Game, id=game_id)
+    feedback_text = request.POST.get('feedback_text')
+
     data = {
-        'game': game_id,
-        'feedback_text': request.data.get('feedback_text'),
-        'submitted_by': request.user.id
+        'game': game.id,
+        'feedback_text': feedback_text,
+        'submitted_by': request.user.id 
     }
-    serializer = GameFeedbackSerializer(
-        data=data, context={'request': request})
+
+    serializer = GameFeedbackSerializer(data=data, context={'request': request})
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -99,9 +119,9 @@ def create_feedback(request, game_id):
 
 
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def get_feedbacks(request, game_id):
-    feedbacks = GameFeedback.objects.filter(game_id=game_id)
+    feedbacks = GameFeedback.objects.filter(game_id=game_id).order_by('-created_at') 
     serializer = GameFeedbackSerializer(feedbacks, many=True)
     return Response(serializer.data)
 

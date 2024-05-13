@@ -60,6 +60,8 @@ urlpatterns = [
          update_feedback, name='update_feedback'),
      path('feedbacks/<int:feedback_id>/delete/',
          delete_feedback, name='delete_feedback'),
+     path('get-game-id/<str:title>/', get_game_id, name='get-game-id'),
+
 
 
 
