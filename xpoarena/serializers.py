@@ -50,11 +50,7 @@ class OrganizationSerializer(serializers.ModelSerializer):
             'created_by': {'read_only': True},
         }
 
-class EventSerializer(serializers.ModelSerializer):
-    organization = OrganizationSerializer()     
-    class Meta:
-        model = Event
-        fields = "__all__"
+
 
 class CreateEventSerializer(serializers.ModelSerializer):
     class Meta:
@@ -122,3 +118,12 @@ class SponsorshipSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sponsorship
         fields = '__all__'
+
+
+class EventSerializer(serializers.ModelSerializer):
+    organization = OrganizationSerializer()     
+    sponsorships = SponsorshipSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Event
+        fields = "__all__"

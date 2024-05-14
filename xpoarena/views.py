@@ -301,7 +301,7 @@ def get_event_by_id(request, event_id):
     except Exception as e:
         # Catch any other exceptions
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+ 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_lead_events(request, username):
@@ -318,7 +318,7 @@ def get_lead_events(request, username):
         events = Event.objects.filter(organization=organization.id)
         print(events)
 
-        # Serialize the event data
+        # Serialize the event data, including sponsorships
         serializer = EventSerializer(events, many=True)
         print(serializer.data)
         return Response(serializer.data)
@@ -329,8 +329,6 @@ def get_lead_events(request, username):
     except Exception as e:
         # Catch any other exceptions
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
 
 
 @api_view(['GET'])
