@@ -114,3 +114,11 @@ class GameFeedbackSerializer(serializers.ModelSerializer):
 
     def get_submitted_by_username(self, obj):
         return obj.submitted_by.username if obj.submitted_by else 'Anonymous'
+    
+
+
+
+class SponsorshipSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sponsorship
+        fields = '__all__'

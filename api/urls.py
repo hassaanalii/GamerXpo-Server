@@ -63,6 +63,11 @@ urlpatterns = [
      path('get-game-id/<str:title>/', get_game_id, name='get-game-id'),
      path('editevent/<int:pk>/', event_edit, name='editevent'),
 
+     path('event/', get_event, name='get_event'),
+
+    path('sponsorship/create/', create_sponsorship, name='create_sponsorship'),
+    path('sponsorship/', get_sponsorships, name='get_sponsorships'),
+
 
 
 

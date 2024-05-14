@@ -86,6 +86,75 @@ def conversations_start(request, user_id):
         return JsonResponse({'success': True, 'conversation_id': conversation.id})
 
 
+
+@api_view(['POST'])
+def create_sponsorship(request):
+    try:
+        print(request.data.get('event'))
+        # Extract event ID from request data
+        event_id = request.data.get('event')
+        if not event_id:
+            return Response({'error': 'Event ID must be provided.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Retrieve the event based on the provided ID
+        event = Event.objects.get(id=event_id)
+
+        # Prepare data for the serializer
+        sponsorship_data = {
+            'event': event.id,
+            'package': request.data.get('package'),
+            'name': request.data.get('name'),
+            'price': request.data.get('price'),
+            'details': request.data.get('details'),
+            'logo': request.FILES.get('logo')  # Handle file upload
+        }
+
+        # Serialize data
+        serializer = SponsorshipSerializer(data=sponsorship_data)
+        if serializer.is_valid():
+            serializer.save()
+
+            # Update the event sponsorship status based on the package type
+            package_type = request.data.get('package')
+            if package_type == 'Gold':
+                event.gold_sponsor = True
+            elif package_type == 'Silver':
+                event.silver_sponsor = True
+            elif package_type == 'Bronze':
+                event.bronze_sponsor = True
+            event.save()
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Event.DoesNotExist:
+        return Response({'error': 'Event not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+# or use [IsAuthenticated] if you want to limit access
+@permission_classes([AllowAny])
+def get_event(request):
+    events = Event.objects.all()
+    serializer = EventSerializer(events, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_sponsorships(request):
+    event_id = request.query_params.get('event_id')
+    if event_id:
+        sponsorships = Sponsorship.objects.filter(event__id=event_id)
+    else:
+        sponsorships = Sponsorship.objects.all()
+    serializer = SponsorshipSerializer(sponsorships, many=True)
+    return Response(serializer.data)
+
+
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
 def event_edit(request, pk):

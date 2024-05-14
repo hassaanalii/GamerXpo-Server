@@ -144,10 +144,33 @@ class Event(models.Model):
     organization = models.ForeignKey('Organization', on_delete=models.CASCADE)
     room_id = models.CharField(max_length=100, unique=True)
 
+    gold_sponsor = models.BooleanField(default=False)
+    silver_sponsor = models.BooleanField(default=False)
+    bronze_sponsor = models.BooleanField(default=False)
+
 
     def __str__(self):
         return self.eventName
     
+
+
+class Sponsorship(models.Model):
+    SPONSORSHIP_CHOICES = [
+        ('Gold', 'Gold'),
+        ('Silver', 'Silver'),
+        ('Bronze', 'Bronze')
+    ]
+
+    event = models.ForeignKey(
+        Event, on_delete=models.CASCADE, related_name='sponsorships')
+    package = models.CharField(max_length=10, choices=SPONSORSHIP_CHOICES)
+    name = models.CharField(max_length=255)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    details = models.TextField()
+    logo = models.ImageField(upload_to=upload_to)
+
+    def _str_(self):
+        return f"{self.package} Sponsorship for {self.event.eventName} by {self.name}"
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
