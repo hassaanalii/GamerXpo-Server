@@ -67,6 +67,8 @@ urlpatterns = [
 
     path('sponsorship/create/', create_sponsorship, name='create_sponsorship'),
     path('sponsorship/', get_sponsorships, name='get_sponsorships'),
+    path('eventslanding/', get_events_for_landing, name='get_events_for_landing'),
+
 
 
 

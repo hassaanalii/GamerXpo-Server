@@ -155,6 +155,13 @@ def get_sponsorships(request):
     return Response(serializer.data)
 
 
+@api_view(['GET'])
+def get_events_for_landing(request):
+    events = Event.objects.all()
+    serializer = EventSerializer(events, many=True)
+    return Response(serializer.data)
+
+
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
 def event_edit(request, pk):
